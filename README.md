@@ -27,40 +27,62 @@ A console-based application built using **Java** and **MySQL** that allows a pol
 
 ## 🗃️ Database Setup
 
-### 1. Create the database:
-
-```sql
 CREATE DATABASE IF NOT EXISTS police_station;
 USE police_station;
-```
 
-### 2. Create tables:
+CREATE TABLE citizens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    cnic VARCHAR(20) UNIQUE
+);
 
-```sql
 CREATE TABLE firs (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100),
-  cnic VARCHAR(20),
-  date VARCHAR(20),
-  time VARCHAR(20),
-  location VARCHAR(100),
-  description TEXT
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    citizen_id INT,
+    date DATE,
+    time TIME,
+    location VARCHAR(100),
+    description TEXT,
+    FOREIGN KEY (citizen_id) REFERENCES citizens(id)
 );
 
 CREATE TABLE complains (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100),
-  cnic VARCHAR(20),
-  description TEXT,
-  is_solved BOOLEAN DEFAULT FALSE
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    citizen_id INT,
+    description TEXT,
+    is_solved BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (citizen_id) REFERENCES citizens(id)
 );
 
 CREATE TABLE staff (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100),
-  gender VARCHAR(10),
-  role VARCHAR(50)
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    gender VARCHAR(10),
+    role VARCHAR(50)
 );
+
+-- View: Complains with citizen name
+CREATE OR REPLACE VIEW ComplainView AS
+SELECT c.id, ct.name, ct.cnic, c.description, c.is_solved
+FROM complains c
+JOIN citizens ct ON c.citizen_id = ct.id;
+
+-- View: FIRs with citizen name
+CREATE OR REPLACE VIEW FirView AS
+SELECT f.id, ct.name, ct.cnic, f.date, f.time, f.location, f.description
+FROM firs f
+JOIN citizens ct ON f.citizen_id = ct.id;
+
+-- Example stored procedure: Mark complain as solved by CNIC
+DELIMITER $$
+CREATE PROCEDURE MarkComplainSolved(IN user_cnic VARCHAR(20))
+BEGIN
+    UPDATE complains 
+    SET is_solved = TRUE 
+    WHERE citizen_id = (SELECT id FROM citizens WHERE cnic = user_cnic);
+END $$
+DELIMITER ;
+
 ```
 
 ### 3. Update credentials in `DBConnection.java`:
