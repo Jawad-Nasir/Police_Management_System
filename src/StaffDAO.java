@@ -1,10 +1,11 @@
 import java.sql.*;
 
 public class StaffDAO {
+
     public void addStaff(Staff staff) {
         String sql = "INSERT INTO staff (name, gender, role) VALUES (?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, staff.getName());
             stmt.setString(2, staff.getGender());
             stmt.setString(3, staff.getRole());
@@ -18,7 +19,7 @@ public class StaffDAO {
     public void deleteStaff(int id) {
         String sql = "DELETE FROM staff WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             int rows = stmt.executeUpdate();
             if (rows > 0) {
@@ -34,16 +35,15 @@ public class StaffDAO {
     public Staff getStaffById(int id) {
         String sql = "SELECT * FROM staff WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 return new Staff(
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    rs.getString("gender"),
-                    rs.getString("role")
-                );
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("gender"),
+                        rs.getString("role"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
